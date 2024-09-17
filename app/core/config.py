@@ -45,6 +45,8 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
+
+    # 配置数据库信息
     POSTGRES_SERVER: str
     POSTGRES_SERVER: str
     POSTGRES_PORT: int = 5432
@@ -63,6 +65,10 @@ class Settings(BaseSettings):
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
         )
+
+    # 配置 kafka信息
+    KAFKA_SERVERS: str
+    KAFKA_PARTITIONS: int = 1
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
