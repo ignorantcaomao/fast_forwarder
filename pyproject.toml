@@ -15,6 +15,12 @@ pyjwt = "^2.9.0"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 sqlmodel = "^0.0.22"
 kafka-python-ng = "^2.2.2"
+pandas = "^2.2.3"
+pydantic = {extras = ["email"], version = "^2.9.2"}
+tenacity = "8.5.0"
+sseclient = "^0.0.27"
+aiohttp = "^3.10.10"
+tortoise-orm = {extras = ["aiomysql"], version = "^0.21.7"}
 
 
 [build-system]

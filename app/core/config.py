@@ -66,9 +66,9 @@ class Settings(BaseSettings):
             path=self.POSTGRES_DB,
         )
 
-    # 配置 kafka信息
-    KAFKA_SERVERS: str
-    KAFKA_PARTITIONS: int = 1
+    # # 配置 kafka信息
+    # KAFKA_SERVERS: str
+    # KAFKA_PARTITIONS: int = 1
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
