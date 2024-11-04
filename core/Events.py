@@ -5,13 +5,13 @@ from typing import Callable
 def startup(app: FastAPI) -> Callable:
     """
     Fastapi 启动完成事件
-    ：param app: Fastapi
+    ：param t_orm: Fastapi
     : return start_app
     """
 
     async def start_app() -> None:
         print("fastapi 已启动")
-        # app.state.cache = await
+        # t_orm.state.cache = await
 
     return start_app
 
@@ -19,7 +19,7 @@ def startup(app: FastAPI) -> Callable:
 def stopping(app: FastAPI) -> Callable:
     """
     Fastapi 停止事件
-    ：param app: Fastapi
+    ：param t_orm: Fastapi
     : return stop_app
     """
 

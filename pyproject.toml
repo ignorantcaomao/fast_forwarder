@@ -21,6 +21,9 @@ tenacity = "8.5.0"
 sseclient = "^0.0.27"
 aiohttp = "^3.10.10"
 tortoise-orm = {extras = ["aiomysql"], version = "^0.21.7"}
+aerich = "^0.7.2"
+asyncpg = "^0.30.0"
+cryptography = "^43.0.3"
 
 
 [build-system]

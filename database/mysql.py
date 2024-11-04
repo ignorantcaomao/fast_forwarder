@@ -23,8 +23,8 @@ DB_ORM_CONFIG = {
         'default': 'postgres://postgres:qwerty123@localhost:5432/events'
     },
     'apps': {
-        'models': {
-            'models': ['__main__'],
+        'models_old': {
+            'models_old': ['__main__'],
             # If no default_connection specified, defaults to 'default'
             'default_connection': 'default',
         }

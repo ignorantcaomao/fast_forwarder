@@ -1,15 +1,15 @@
 # from fastapi import FastAPI
-# from app.core.config import settings
+# from t_orm.core.config import settings
 #
 #
-# app = FastAPI(
+# t_orm = FastAPI(
 #     title=settings.PROJECT_NAME,
 #     openapi_url=f"{settings.API_V1_STR}/openapi.json",
 #     docs_url=f"{settings.API_V1_STR}/docs"
 # )
 #
 #
-# @app.get("/")
+# @t_orm.get("/")
 # async def root():
 #     return {"message": settings}
 #
@@ -43,7 +43,7 @@ async def sse(request: Request):
     # 返回SSE流
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
-# @app.post("/sse")
+# @t_orm.post("/sse")
 # async def sse(client_id: str, request: Request):
 #     # 返回SSE流
 #     return StreamingResponse(event_generator(), media_type="text/event-stream")
