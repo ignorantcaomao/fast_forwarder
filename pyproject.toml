@@ -24,6 +24,8 @@ tortoise-orm = {extras = ["aiomysql"], version = "^0.21.7"}
 aerich = "^0.7.2"
 asyncpg = "^0.30.0"
 cryptography = "^43.0.3"
+redis = "^5.2.0"
+types-redis = "^4.6.0.20241004"
 
 
 [build-system]
