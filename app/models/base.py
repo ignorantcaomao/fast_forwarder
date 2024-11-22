@@ -2,8 +2,8 @@ from tortoise import fields, models
 
 
 class TimestampMixin(models.Model):
-    created_time = fields.DatetimeField(auto_now_add=True)
-    modified_time = fields.DatetimeField(auto_now=True)
+    created_time = fields.DatetimeField(auto_now_add=True, description="创建时间")
+    modified_time = fields.DatetimeField(auto_now=True, description="更新时间")
 
     class Meta:
         abstract = True
@@ -44,10 +44,10 @@ class Access(TimestampMixin):
 class User(TimestampMixin):
     username = fields.CharField(max_length=128, unqiue=True, description="用户名")
     password = fields.CharField(max_length=255, description="密码")
-    email = fields.CharField(max_length=255, description="邮箱")
+    email = fields.CharField(null=True, max_length=255, description="邮箱")
     is_active = fields.BooleanField(default=False, description="用户状态")
     is_superuser = fields.BooleanField(default=False, description="是否是超级用户")
-    phone = fields.CharField(null=True, max_length=11, description="手机号码")
+    phone = fields.CharField(max_length=11, description="手机号码")
 
     role: fields.ManyToManyRelation[Role]
 

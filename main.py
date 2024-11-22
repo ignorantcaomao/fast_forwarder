@@ -3,6 +3,7 @@ from app.core.config import settings
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from app.core.db import register_tortoise
+from app.core import Router
 
 
 @asynccontextmanager
@@ -17,3 +18,5 @@ app = FastAPI(
     version=settings.PROJECT_VERSION,
     lifespan=lifespan,
 )
+
+app.include_router(Router.router)
