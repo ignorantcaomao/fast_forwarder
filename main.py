@@ -1,22 +1,32 @@
-from fastapi import FastAPI
-from app.core.config import settings
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
-from app.core.db import register_tortoise
+from typing import AsyncGenerator, AsyncIterator
+
+from fastapi import FastAPI
+from fastapi_lifespan_manager import LifespanManager, State
+
 from app.core import Router
+from app.core.config import settings
+from app.core.db import register_tortoise
+
+manager = LifespanManager()
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    async with register_tortoise(app):
-        yield
+async def setup_db(app: FastAPI) -> AsyncIterator[State]:
+    db = await register_tortoise(app)
+    yield {"db": db}
+    await db.close_orm()
+
+# @asynccontextmanager
+# async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+#     async with register_tortoise(app):
+#         yield
 
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description=settings.PROJECT_DESCRIPTION,
     version=settings.PROJECT_VERSION,
-    lifespan=lifespan,
+    lifespan=manager,
 )
 
 app.include_router(Router.router)

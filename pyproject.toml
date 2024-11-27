@@ -26,8 +26,17 @@ asyncpg = "^0.30.0"
 cryptography = "^43.0.3"
 redis = "^5.2.0"
 types-redis = "^4.6.0.20241004"
+bcrypt = "4.0.1"
+pydantic-extra-types = "^2.10.0"
+phonenumbers = "^8.13.50"
+fastapi-lifespan-manager = "^0.1.4"
 
 
+
+[tool.aerich]
+tortoise_orm = "app.core.db.DB_ORM_CONFIG"
+location = "./migrations"
+src_folder = "./."
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
