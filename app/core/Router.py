@@ -1,5 +1,7 @@
-from app.api.api import apirouter
+"""应用总路由"""
 from fastapi import APIRouter
+
+from app.api.api import apirouter
 
 router = APIRouter()
 

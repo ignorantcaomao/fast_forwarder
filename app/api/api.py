@@ -1,4 +1,6 @@
+"""api总路由"""
 from fastapi import APIRouter
+
 from app.api.endpoints import user
 
 apirouter = APIRouter(prefix="/api/v1")

@@ -1,7 +1,9 @@
+"""数据库配置文件"""
 from functools import partial
-from tortoise.contrib.fastapi import RegisterTortoise
-from app.core.config import settings
 
+from tortoise.contrib.fastapi import RegisterTortoise
+
+from app.core.config import settings
 
 DATABASE_URLS: dict[str, str] = {
     "sqlite": "sqlite://db.sqlite3",
@@ -12,6 +14,11 @@ DATABASE_URLS: dict[str, str] = {
 
 # 获取数据库连接信息
 def get_database_url() -> str:
+    """根据类型返回数据库连接形式
+
+    Returns:
+        str: _description_
+    """
     # 从环境变量中获取数据库类型（默认为 SQLite）
     db_type = settings.DB_TYPE
     # 根据数据库类型返回相应的数据库 URL
@@ -23,8 +30,8 @@ DB_ORM_CONFIG = {
         "default": get_database_url(),
     },
     "apps": {
-        "base": {
-            "models": ["app.models.base"],
+        "models": {
+            "models": ["app.models", "aerich.models"],
             "default_connection": "default",
         }
     },
@@ -32,7 +39,6 @@ DB_ORM_CONFIG = {
     "timezone": "Asia/Shanghai",
 }
 
-print(DB_ORM_CONFIG)
 
 register_tortoise = partial(
     RegisterTortoise,
@@ -40,3 +46,5 @@ register_tortoise = partial(
     generate_schemas=True,
     add_exception_handlers=True,
 )
+
+print(DB_ORM_CONFIG)

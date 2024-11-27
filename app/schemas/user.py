@@ -1,16 +1,15 @@
-from pydantic import Field, BaseModel, ValidationError, constr
-from typing import Optional
-from re import fullmatch
-
-
-def phone_number(value: str) -> str:
-    if not fullmatch(r"/^(?:(?:\+|00)86)?1\d{10}$/", value):
-        raise ValueError("不是有效的中国大陆手机号")
-    return value
+"""user序列化"""
+from pydantic import BaseModel, EmailStr, Field
+from pydantic_extra_types.phone_numbers import PhoneNumber
 
 
 class UserCreate(BaseModel):
+    """新建用户使用的模型
+
+    Args:
+        BaseModel (_type_): _description_
+    """
     username: str = Field(min_length=3, max_length=20)
     password: str = Field(min_length=8, max_length=20)
-    phone: constr(min_length=11, max_length=11) = phone_number  # type: ignore
-    # email: Optional[str] = Field(max_length=50)
+    phone: PhoneNumber
+    email: EmailStr
