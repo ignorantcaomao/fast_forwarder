@@ -1,7 +1,7 @@
 """应用配置文件"""
 from typing import List
 
-from pydantic import Field
+from pydantic import EmailStr, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -51,15 +51,15 @@ class Settings(BaseSettings):
     RABBITMQ_USER: str = "guest"
     RABBITMQ_PASSWORD: str = "guest"
 
-    MAIL_USERNAME = "caomaodjs@163.com"  # 替换为163邮箱
-    MAIL_PASSWORD = "your_smtp_password"  # 替换为授权码
-    MAIL_FROM = "caomaodjs@163.com"
-    MAIL_PORT = 465
-    MAIL_SERVER = "smtp.163.com"
-    MAIL_FROM_NAME = "caomaodjs"
+    MAIL_USERNAME: EmailStr = "caomaodjs@163.com"  # 替换为163邮箱
+    MAIL_PASSWORD: str = "your_smtp_password"  # 替换为授权码
+    MAIL_FROM: EmailStr = "caomaodjs@163.com"
+    MAIL_PORT: int = 465
+    MAIL_SERVER: str = "smtp.163.com"
+    MAIL_FROM_NAME: str = "caomaodjs"
 
     # 模板文件路径
-    TEMPLATES_DIR = "templates"
+    TEMPLATES_DIR = "app/templates"
 
 
 settings = Settings()
