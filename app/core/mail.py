@@ -1,7 +1,8 @@
 """email 配置文件"""
+
 from fastapi import BackgroundTasks
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, Template
 
 from app.core.config import settings
 
@@ -10,14 +11,14 @@ templates = Environment(loader=FileSystemLoader(settings.TEMPLATES_DIR))
 
 # email 配置文件
 MAIL_CONF = ConnectionConfig(
-    MAIL_USERNAME=settings.MAIL_USERNAME,      # 替换为163邮箱
-    MAIL_PASSWORD=settings.MAIL_PASSWORD,     # 替换为授权码
+    MAIL_USERNAME=settings.MAIL_USERNAME,  # 替换为163邮箱
+    MAIL_PASSWORD=settings.MAIL_PASSWORD,  # 替换为授权码
     MAIL_FROM=settings.MAIL_FROM,
     MAIL_PORT=settings.MAIL_PORT,
     MAIL_SERVER=settings.MAIL_SERVER,
     MAIL_FROM_NAME=settings.MAIL_FROM_NAME,
-    MAIL_TLS=False,
-    MAIL_SSL=True,
+    MAIL_STARTTLS=False,
+    MAIL_SSL_TLS=True,
     USE_CREDENTIALS=True,
     VALIDATE_CERTS=True,
 )
@@ -30,7 +31,7 @@ def render_email_template(template_name: str, context: dict) -> str:
     :param context: 渲染模板所需的上下文数据
     :return: 渲染后的 HTML 字符串
     """
-    template = templates.get_template(template_name)
+    template: Template = templates.get_template(template_name)
     return template.render(context)
 
 
@@ -40,7 +41,7 @@ async def send_email(
     context: dict,
     background_tasks: BackgroundTasks,
     template_name: str = "email_template.html",
-):
+) -> None:
     """
     发送邮件工具函数
     :param subject: 邮件主题
@@ -49,7 +50,7 @@ async def send_email(
     :param context: 渲染模板所需的上下文数据
     :param background_tasks: FastAPI 的后台任务实例
     """
-    html_content = render_email_template(template_name, context)
+    html_content: str = render_email_template(template_name, context)
 
     message = MessageSchema(
         subject=subject,

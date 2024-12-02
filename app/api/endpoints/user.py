@@ -1,4 +1,5 @@
 """用户视图"""
+
 from typing import Any
 
 import jwt
@@ -6,7 +7,7 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from fastapi_mail import FastMail, MessageSchema, MessageType
 from jose import JWTError
 
-from app.core.mail import MAIL_CONF, render_email_template, send_email
+from app.core.mail import send_email
 from app.core.Response import fail, success
 from app.core.Utils import create_confirmation_token, get_password_hash
 from app.models import User
@@ -15,35 +16,37 @@ from app.schemas.user import UserCreate
 router = APIRouter(prefix="/user")
 
 
-@router.post("", summary="添加用户")
-async def create_user(user: UserCreate) -> dict[str, Any]:
-    """创建新用户
+# @router.post("", summary="添加用户")
+# async def create_user(user: UserCreate) -> dict[str, Any]:
+#     """创建新用户
 
-    Args:
-        user (UserCreate): _description_
+#     Args:
+#         user (UserCreate): _description_
 
-    Returns:
-        dict[str, Any]: _description_
-    """
+#     Returns:
+#         dict[str, Any]: _description_
+#     """
 
-    try:
-        await User.get_or_none(username=user.username)
+#     try:
+#         await User.get_or_none(username=user.username)
 
-    except Exception as e:
-        print(e)
-        return fail(msg=f"{user.username} 已存在")
+#     except Exception as e:
+#         print(e)
+#         return fail(msg=f"{user.username} 已存在")
 
-    hashed_password = get_password_hash(user.password)
-    user.password = hashed_password
+#     hashed_password = get_password_hash(user.password)
+#     user.password = hashed_password
 
-    user_obj: User = await User.create(**user.dict())
-    if not user_obj:
-        return fail(msg=f"创建用户{user.username}失败")
-    return success(msg=f"{user_obj.username} 创建成功")
+#     user_obj: User = await User.create(**user.dict())
+#     if not user_obj:
+#         return fail(msg=f"创建用户{user.username}失败")
+#     return success(msg=f"{user_obj.username} 创建成功")
 
 
 @router.post("/register/", summary="用户注册")
-async def register(request: Request, user: UserCreate, background_tasks: BackgroundTasks):
+async def register(
+    request: Request, user: UserCreate, background_tasks: BackgroundTasks
+):
     """用户注册函数"""
     # 判断用户的邮箱是否注册过
     user_obj = await User.get_or_none(email=user.email)
@@ -61,15 +64,17 @@ async def register(request: Request, user: UserCreate, background_tasks: Backgro
         await send_email(
             subject="Confirm Your Registration",
             email_to=user.email,
-            context={"username": request.username, "confirm_url": confirm_url,
-                     "subject": "Confirm Your Registration"},
+            context={
+                "username": user.username,
+                "confirm_url": confirm_url,
+                "subject": "Confirm Your Registration",
+            },
             background_tasks=background_tasks,
-            template_name="email_template.html"
+            template_name="email_template.html",
         )
         return success(msg="注册成功，请检查您的邮箱并点击激活链接")
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to send email: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
 
 
 # async def confirm(token: str):

@@ -1,16 +1,16 @@
-
 """角色表"""
+
 from tortoise import fields
 
-from .Base import TimestampMixin
+from .base import TimestampMixin
 
 
 class Role(TimestampMixin):
     """#-
     Role: 定义资源及其操作权限#-
     """  # -
-    role_name = fields.CharField(
-        max_length=255, unique=True, description="角色名称")
+
+    role_name = fields.CharField(max_length=255, unique=True, description="角色名称")
     role_status = fields.BooleanField(
         default=False, description="True： 启用 False: 禁用"
     )
@@ -30,6 +30,7 @@ class RoleBinding(TimestampMixin):
     """#-
     RoleBinding: 将 Role 绑定到用户#-
     """  # -
+
     user_id = fields.CharField(max_length=50)  # 用户唯一标识#-
     role = fields.ForeignKeyField("models.Role", related_name="bindings")
 
