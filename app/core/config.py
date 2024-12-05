@@ -53,8 +53,8 @@ class Settings(BaseSettings):
     RABBITMQ_USER: str = "guest"
     RABBITMQ_PASSWORD: str = "guest"
 
-    MAIL_USERNAME: EmailStr = "caomaodjs@163.com"  # 替换为163邮箱
-    MAIL_PASSWORD: SecretStr = SecretStr("BWRyYpGeb3mw3Efq")  # 替换为授权码
+    MAIL_USERNAME: EmailStr = "caomaodjs@163.com"
+    MAIL_PASSWORD: SecretStr = SecretStr("BWRyYpGeb3mw3Efq")
     MAIL_FROM: EmailStr = "caomaodjs@163.com"
     MAIL_PORT: int = 465
     MAIL_SERVER: str = "smtp.163.com"
