@@ -1,17 +1,18 @@
 """用户视图"""
 
-from typing import Any
+from typing import Any, List
 
 import jwt
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
-from fastapi_mail import FastMail, MessageSchema, MessageType
 from jose import JWTError
+from pydantic import EmailStr
 
 from app.core.mail import send_email
 from app.core.Response import fail, success
 from app.core.Utils import create_confirmation_token, get_password_hash
 from app.models import User
 from app.schemas.user import UserCreate
+from app.core.config import settings
 
 router = APIRouter(prefix="/user")
 
@@ -47,9 +48,10 @@ router = APIRouter(prefix="/user")
 async def register(
     request: Request, user: UserCreate, background_tasks: BackgroundTasks
 ):
+    print(f"email: {user.email}")
     """用户注册函数"""
     # 判断用户的邮箱是否注册过
-    user_obj = await User.get_or_none(email=user.email)
+    user_obj: User | None = await User.get_or_none(email=user.email)
     if user_obj:
         return fail(msg="邮箱已注册")
 
@@ -57,7 +59,7 @@ async def register(
     hashed_password = get_password_hash(user.password)
     # 创建确认令牌
     token = create_confirmation_token(user.email)
-    confirm_url = f"http://127.0.0.1:8000/confirm/?token={token}"
+    confirm_url = f"http://127.0.0.1:8000/api/v1/admin/user/confirm/?token={token}"
 
     # 发送邮件
     try:
@@ -77,12 +79,27 @@ async def register(
         raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
 
 
-# async def confirm(token: str):
-#     try:
-#         payload = jwt.decode(token, ECRET_KEY, algorithms=[ALGORITHM])
-#         email = payload["sub"]
-#         if email is None:
-#             raise HTTPException(status_code=400, detail="Invalid token")
+@router.get("/confirm/", summary="用户确认")
+async def confirm(token: str):
+    try:
+        payload: Any = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        email: EmailStr = payload["sub"]
 
-#     except JWTError:
-#         raise HTTPException(status_code=400, detail="Invalid or expired token")
+        if email is None:
+            raise HTTPException(status_code=400, detail="Invalid token")
+        return success(msg="激活成功")
+
+    except JWTError:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+
+
+@router.get("/list/", summary="用户列表")
+async def get_users():
+    user_list: List[User] = await User.all()
+
+    # for user in user_list:
+    #     print(user.username)
+
+    return user_list

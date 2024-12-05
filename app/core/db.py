@@ -1,7 +1,9 @@
 """数据库配置文件"""
+
 from functools import partial
 
 from tortoise.contrib.fastapi import RegisterTortoise
+from tortoise import Tortoise
 
 from app.core.config import settings
 
@@ -48,3 +50,15 @@ register_tortoise = partial(
 )
 
 print(DB_ORM_CONFIG)
+
+
+# 使用 Fastapi LifespanManager  和  tortoise-orm 结合
+async def init_db():
+    """Setup database connection"""
+    await Tortoise.init(config=DB_ORM_CONFIG)
+    await Tortoise.generate_schemas()
+
+
+async def close_db():
+    """Close database connection"""
+    await Tortoise.close_connections()

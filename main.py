@@ -1,30 +1,49 @@
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
+from typing import AsyncIterator, AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi_lifespan_manager import LifespanManager, State
 
 from app.core import Router
-from app.core.cache import init_redis
+
+# from app.core.cache import init_redis
 from app.core.config import settings
-from app.core.db import register_tortoise
+from app.core.db import register_tortoise, init_db, close_db
+import logging
 
 manager = LifespanManager()
 
+# 配置日志记录
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+# 打印tortoise 执行过程中的sql 语句
+logging.getLogger("tortoise.db_client").setLevel(logging.DEBUG)
 
+
+@manager.add
 async def setup_db(app: FastAPI) -> AsyncIterator[State]:
     """Setup database connection"""
-    db = await register_tortoise(app)
+    # db = await register_tortoise(app)
+    # yield {"db": db}
+    db = await init_db()
     yield {"db": db}
-    await db.close_orm()
+    await close_db()
 
 
-async def setup_cache(app: FastAPI) -> AsyncIterator[State]:
-    """Setup cache connection"""
-    # Implement cache setup logic here
-    cache = await init_redis()
-    yield {"cache": cache}
-    await cache.close_redis()
+# async def setup_cache(app: FastAPI) -> AsyncIterator[State]:
+#     """Setup cache connection"""
+#     # Implement cache setup logic here
+#     cache = await init_redis()
+#     yield {"cache": cache}
+#     await cache.close_redis()
+
+
+# @asynccontextmanager
+# async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+
+#     async with register_tortoise(app):
+#         yield
 
 
 app = FastAPI(
