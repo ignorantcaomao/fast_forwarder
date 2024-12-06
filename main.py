@@ -6,9 +6,9 @@ from fastapi_lifespan_manager import LifespanManager, State
 
 from app.core import Router
 
-# from app.core.cache import init_redis
+from app.core.cache import init_redis
 from app.core.config import settings
-from app.core.db import register_tortoise, init_db, close_db
+from app.core.db import init_db, close_db
 import logging
 
 manager = LifespanManager()
@@ -31,12 +31,15 @@ async def setup_db(app: FastAPI) -> AsyncIterator[State]:
     await close_db()
 
 
-# async def setup_cache(app: FastAPI) -> AsyncIterator[State]:
-#     """Setup cache connection"""
-#     # Implement cache setup logic here
-#     cache = await init_redis()
-#     yield {"cache": cache}
-#     await cache.close_redis()
+@manager.add
+async def setup_cache(app: FastAPI) -> AsyncIterator[State]:
+    """Setup cache connection"""
+    print("设置Redis 连接信息")
+    # Implement cache setup logic here
+    cache = await init_redis()
+    await cache.set("hello", "world")
+    yield {"cache": cache}
+    await cache.aclose()
 
 
 # @asynccontextmanager

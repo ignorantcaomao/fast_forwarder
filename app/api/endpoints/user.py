@@ -1,7 +1,7 @@
 """用户视图"""
 
 from typing import Any, List
-
+import uuid
 import jwt
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from jose import JWTError
@@ -48,18 +48,31 @@ router = APIRouter(prefix="/user")
 async def register(
     request: Request, user: UserCreate, background_tasks: BackgroundTasks
 ):
-    print(f"email: {user.email}")
     """用户注册函数"""
     # 判断用户的邮箱是否注册过
     user_obj: User | None = await User.get_or_none(email=user.email)
     if user_obj:
         return fail(msg="邮箱已注册")
 
+    # 生成一个激活令牌
+    activation_token = str(uuid.uuid4())
+
+    print(activation_token)
+
     # 密码加密
     hashed_password = get_password_hash(user.password)
-    # 创建确认令牌
-    token = create_confirmation_token(user.email)
-    confirm_url = f"http://127.0.0.1:8000/api/v1/admin/user/confirm/?token={token}"
+
+    # 修改用户提交的password
+    user.password = hashed_password
+
+    # 使用激活令牌作为 Redis 键，存储用户信息
+    redis_key: str = f"activation:{activation_token}"
+    await request.cache.hmset(redis_key, user)
+    await request.cache.expire(redis_key, int(30))
+
+    # # 创建确认令牌
+    # token = create_confirmation_token(user.email)
+    # confirm_url = f"http://127.0.0.1:8000/api/v1/admin/user/confirm/?token={token}"
 
     # 发送邮件
     try:
@@ -68,7 +81,7 @@ async def register(
             email_to=user.email,
             context={
                 "username": user.username,
-                "confirm_url": confirm_url,
+                "confirm_url": activation_token,
                 "subject": "Confirm Your Registration",
             },
             background_tasks=background_tasks,
@@ -80,19 +93,33 @@ async def register(
 
 
 @router.get("/confirm/", summary="用户确认")
-async def confirm(token: str):
-    try:
-        payload: Any = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+async def confirm(request: Request, activation_token: str):
+    """用户注册确认函数"""
+    # try:
+    #     payload: Any = jwt.decode(
+    #         token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+    #     )
+    #     email: EmailStr = payload["sub"]
+
+    #     if email is None:
+    #         raise HTTPException(status_code=400, detail="Invalid token")
+    #     return success(msg="激活成功")
+
+    # except JWTError:
+    #     raise HTTPException(status_code=400, detail="Invalid or expired token")
+    redis_key: str = f"activation:{activation_token}"
+    if not await request.cache.exists(redis_key):
+        raise HTTPException(
+            status_code=400, detail="Invalid or expired activation token"
         )
-        email: EmailStr = payload["sub"]
 
-        if email is None:
-            raise HTTPException(status_code=400, detail="Invalid token")
-        return success(msg="激活成功")
+    user_info: Any = await request.cache.hgetall(redis_key)
+    print(user_info, type(user_info))
 
-    except JWTError:
-        raise HTTPException(status_code=400, detail="Invalid or expired token")
+    # 数据写入数据库中
+    # User.create(**user_info)
+
+    # await request.cache.delete(redis_key)
 
 
 @router.get("/list/", summary="用户列表")
