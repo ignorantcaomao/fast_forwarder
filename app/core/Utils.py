@@ -1,9 +1,12 @@
 """工具类"""
+
 from datetime import datetime, timedelta
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+
+from urllib.parse import urljoin
 
 from app.core.config import settings
 
@@ -48,5 +51,13 @@ def verify_confirmation_token(token: str) -> str:
             raise HTTPException(status_code=400, detail="Invalid token")
         return email
     except JWTError:
-        raise HTTPException(
-            status_code=400, detail="Invalid token or expired token")
+        raise HTTPException(status_code=400, detail="Invalid token or expired token")
+
+
+# 动态生成确认链接的依赖
+def get_confirmation_url(request: Request, router_prefix: str) -> str:
+    # 获取基础 URL (包含协议和域名)
+    base_url: str = str(request.base_url)
+    # 拼接完整的确认链接
+    confirmation_url: str = urljoin(base_url, f"{router_prefix}/verify-email")
+    return confirmation_url

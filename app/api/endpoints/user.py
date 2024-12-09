@@ -2,51 +2,26 @@
 
 from typing import Any, List
 import uuid
-import jwt
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
-from jose import JWTError
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, Depends
 from pydantic import EmailStr
 
 from app.core.mail import send_email
 from app.core.Response import fail, success
-from app.core.Utils import create_confirmation_token, get_password_hash
+from app.core.Utils import get_password_hash, get_confirmation_url
 from app.models import User
 from app.schemas.user import UserCreate
-from app.core.config import settings
 
 router = APIRouter(prefix="/user")
 
 
-# @router.post("", summary="添加用户")
-# async def create_user(user: UserCreate) -> dict[str, Any]:
-#     """创建新用户
-
-#     Args:
-#         user (UserCreate): _description_
-
-#     Returns:
-#         dict[str, Any]: _description_
-#     """
-
-#     try:
-#         await User.get_or_none(username=user.username)
-
-#     except Exception as e:
-#         print(e)
-#         return fail(msg=f"{user.username} 已存在")
-
-#     hashed_password = get_password_hash(user.password)
-#     user.password = hashed_password
-
-#     user_obj: User = await User.create(**user.dict())
-#     if not user_obj:
-#         return fail(msg=f"创建用户{user.username}失败")
-#     return success(msg=f"{user_obj.username} 创建成功")
-
-
 @router.post("/register/", summary="用户注册")
 async def register(
-    request: Request, user: UserCreate, background_tasks: BackgroundTasks
+    request: Request,
+    user: UserCreate,
+    background_tasks: BackgroundTasks,
+    confirmation_url: str = Depends(
+        lambda req=Depends(Request): get_confirmation_url(req, "/user")
+    ),
 ):
     """用户注册函数"""
     # 判断用户的邮箱是否注册过
@@ -58,20 +33,23 @@ async def register(
     activation_token = str(uuid.uuid4())
 
     print(activation_token)
+    # 生成确认链接
+    full_url = f"{confirmation_url}?activation_token={activation_token}"
+    print(full_url)
 
     # 密码加密
-    hashed_password = get_password_hash(user.password)
+    hashed_password: str = get_password_hash(user.password)
 
     # 修改用户提交的password
     user.password = hashed_password
     print(user.model_dump())
+    confirm_url = router.url_path_for("confirm")
+    print(confirm_url)
     # 使用激活令牌作为 Redis 键，存储用户信息
     redis_key: str = f"activation:{activation_token}"
     await request.state.cache.hmset(redis_key, user.model_dump())
     await request.state.cache.expire(redis_key, int(300))
 
-    # # 创建确认令牌
-    # token = create_confirmation_token(user.email)
     # confirm_url = f"http://127.0.0.1:8000/api/v1/admin/user/confirm/?token={token}"
 
     # 发送邮件

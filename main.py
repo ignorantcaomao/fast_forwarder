@@ -1,5 +1,4 @@
-from contextlib import asynccontextmanager
-from typing import AsyncIterator, AsyncGenerator
+from typing import AsyncIterator
 
 from fastapi import FastAPI
 from fastapi_lifespan_manager import LifespanManager, State
@@ -37,16 +36,8 @@ async def setup_cache(app: FastAPI) -> AsyncIterator[State]:
     print("设置Redis 连接信息")
     # Implement cache setup logic here
     cache = await init_redis()
-    await cache.set("hello", "world")
     yield {"cache": cache}
     await cache.aclose()
-
-
-# @asynccontextmanager
-# async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-
-#     async with register_tortoise(app):
-#         yield
 
 
 app = FastAPI(
