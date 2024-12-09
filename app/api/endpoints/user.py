@@ -64,11 +64,11 @@ async def register(
 
     # 修改用户提交的password
     user.password = hashed_password
-
+    print(user.model_dump())
     # 使用激活令牌作为 Redis 键，存储用户信息
     redis_key: str = f"activation:{activation_token}"
-    await request.cache.hmset(redis_key, user)
-    await request.cache.expire(redis_key, int(30))
+    await request.state.cache.hmset(redis_key, user.model_dump())
+    await request.state.cache.expire(redis_key, int(300))
 
     # # 创建确认令牌
     # token = create_confirmation_token(user.email)
@@ -108,12 +108,12 @@ async def confirm(request: Request, activation_token: str):
     # except JWTError:
     #     raise HTTPException(status_code=400, detail="Invalid or expired token")
     redis_key: str = f"activation:{activation_token}"
-    if not await request.cache.exists(redis_key):
+    if not await request.state.cache.exists(redis_key):
         raise HTTPException(
             status_code=400, detail="Invalid or expired activation token"
         )
 
-    user_info: Any = await request.cache.hgetall(redis_key)
+    user_info: Any = await request.state.cache.hgetall(redis_key)
     print(user_info, type(user_info))
 
     # 数据写入数据库中
